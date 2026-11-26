@@ -16,7 +16,7 @@
   - Daily average spend metric.
 
 ### 2. ⚡ Automated New Month Static Expenses Setup
-- As soon as a new month starts, FlatSplit prompts you with a checklist banner:
+- As soon as a new month starts, Hisaab prompts you with a checklist banner:
   > *"✨ November Static Expenses — Add Society, Electricity, Maid & flat bills"*
 - Tapping **"Review & Add"** opens the monthly setup sheet:
   - Pre-filled with your configurable recurring bills (Society Dues, Maid Salary, Cook Salary, Gas Cylinder, WiFi Broadband, etc.).
@@ -39,14 +39,7 @@
 
 ### 4. 📱 100% Mobile-First PWA (Phone Native Feel)
 - Designed following clean design principles: touch targets (44px+), no clunky UI or neon glow.
-- **6 Curated Themes with 1-Tap Switching**:
-  - ☕ **Warm Espresso** (Default): Artisanal dark roast, warm amber & golden ivory.
-  - ⚡ **Electric Indigo**: Deep midnight, modern fintech iris & violet.
-  - 📰 **Nordic Paper**: Crisp daylight linen editorial with deep forest teal.
-  - 🌅 **Sunset Coral**: Pomegranate dusk & radiant coral.
-  - 🖤 **OLED Stealth**: Pure black contrast battery-saver & electric lime.
-  - 🍃 **Slate & Mint**: Classic graphite & crisp mint.
-- **Quick Theme Switcher Button**: Tap the palette icon (`🎨`) directly in the top header to cycle themes on the fly.
+- **Refined Nordic Paper Aesthetic**: Warm linen background (`#f6f4ee`), clean typography, crisp touch targets (44px+), and dark pine teal accent with warm amber highlights.
 - Tactile bottom sheets for expense creation and editing.
 - Bottom navigation with dynamic badge indicators.
 - iPhone safe-area padding (`env(safe-area-inset-bottom)`) for edge-to-edge screens.

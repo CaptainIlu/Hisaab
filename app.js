@@ -1,5 +1,5 @@
 /**
- * FlatSplit - Progressive Web App for Flatmate Expenses & Splitwise Sync
+ * Hisaab - Progressive Web App for Flatmate Expenses & Splitwise Sync
  */
 
 (function () {
@@ -31,57 +31,8 @@
     { id: 't_gas', title: 'Gas Cylinder', category: 'Gas Cylinder', defaultAmount: 950, dayOfMonth: 22, defaultPaidBy: 'flatmate', active: true }
   ];
 
-  // --- Curated Theme Presets ---
-  const THEMES = [
-    {
-      id: 'warm-espresso',
-      name: 'Warm Espresso',
-      desc: 'Dark roast, warm amber & golden ivory',
-      colors: ['#14110f', '#28221e', '#f59e0b'],
-      statusBar: '#14110f',
-      chartPalette: ['#f59e0b', '#fb923c', '#eab308', '#a8a29e', '#f43f5e', '#d97706', '#78716c']
-    },
-    {
-      id: 'electric-indigo',
-      name: 'Electric Indigo',
-      desc: 'Midnight blue, vibrant iris & violet',
-      colors: ['#0b0e1a', '#1a213d', '#6366f1'],
-      statusBar: '#0b0e1a',
-      chartPalette: ['#6366f1', '#8b5cf6', '#06b6d4', '#ec4899', '#3b82f6', '#a855f7', '#64748b']
-    },
-    {
-      id: 'nordic-light',
-      name: 'Nordic Paper',
-      desc: 'Crisp linen daylight, deep forest teal',
-      colors: ['#f6f4ee', '#ffffff', '#0f766e'],
-      statusBar: '#f6f4ee',
-      chartPalette: ['#0f766e', '#d97706', '#2563eb', '#7c3aed', '#be123c', '#4b5563', '#059669']
-    },
-    {
-      id: 'sunset-terracotta',
-      name: 'Sunset Coral',
-      desc: 'Pomegranate dusk & radiant coral',
-      colors: ['#180d11', '#311c24', '#f43f5e'],
-      statusBar: '#180d11',
-      chartPalette: ['#f43f5e', '#fb923c', '#f59e0b', '#e11d48', '#fda4af', '#be123c', '#9f7582']
-    },
-    {
-      id: 'oled-stealth',
-      name: 'OLED Stealth',
-      desc: 'True black battery-saver & neon lime',
-      colors: ['#000000', '#171717', '#84cc16'],
-      statusBar: '#000000',
-      chartPalette: ['#84cc16', '#22d3ee', '#facc15', '#f43f5e', '#a855f7', '#38bdf8', '#71717a']
-    },
-    {
-      id: 'slate-emerald',
-      name: 'Slate & Mint',
-      desc: 'Muted graphite & fresh mint',
-      colors: ['#0a0e17', '#182030', '#10b981'],
-      statusBar: '#0a0e17',
-      chartPalette: ['#10b981', '#38bdf8', '#a855f7', '#f59e0b', '#ec4899', '#6366f1', '#94a3b8']
-    }
-  ];
+  // --- Nordic Paper Chart Palette ---
+  const CHART_PALETTE = ['#0f766e', '#d97706', '#2563eb', '#7c3aed', '#be123c', '#4b5563', '#059669'];
 
   // --- Initial State ---
   let state = {
@@ -94,7 +45,7 @@
       userName: 'Shivam',
       flatmateName: 'Sanket',
       currency: '₹',
-      theme: 'warm-espresso'
+      theme: 'nordic-paper'
     },
     activeTab: 'expenses',
     currentMonth: getTodayMonthString(), // 'YYYY-MM'
@@ -102,30 +53,15 @@
     splitwiseFilter: 'pending' // 'pending' | 'synced' | 'all'
   };
 
-  function getCurrentTheme() {
-    return THEMES.find(t => t.id === (state.settings.theme || 'warm-espresso')) || THEMES[0];
-  }
-
   function getThemeChartPalette() {
-    return getCurrentTheme().chartPalette;
+    return CHART_PALETTE;
   }
 
-  function applyTheme(themeId) {
-    const theme = THEMES.find(t => t.id === themeId) || THEMES[0];
-    document.documentElement.setAttribute('data-theme', theme.id);
+  function applyTheme() {
+    document.documentElement.removeAttribute('data-theme');
     const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) metaTheme.setAttribute('content', theme.statusBar);
-    state.settings.theme = theme.id;
-    saveData();
-  }
-
-  function cycleTheme() {
-    const currentIndex = THEMES.findIndex(t => t.id === (state.settings.theme || 'warm-espresso'));
-    const nextIndex = (currentIndex + 1) % THEMES.length;
-    const nextTheme = THEMES[nextIndex];
-    applyTheme(nextTheme.id);
-    render();
-    showToast(`Switched to ${nextTheme.name} theme ✨`);
+    if (metaTheme) metaTheme.setAttribute('content', '#f6f4ee');
+    state.settings.theme = 'nordic-paper';
   }
 
   function getTodayMonthString() {
@@ -170,18 +106,15 @@
             else t.dayOfMonth = 1;
           }
         });
-        // Switch to the fresh Warm Espresso theme if unset or previously on default slate
-        if (!state.settings.theme || state.settings.theme === 'slate-emerald') {
-          state.settings.theme = 'warm-espresso';
-        }
+        state.settings.theme = 'nordic-paper';
       } else {
         // First run: load initial sample month data so the user sees immediate value
         seedInitialData();
       }
-      applyTheme(state.settings.theme || 'warm-espresso');
+      applyTheme();
     } catch (e) {
       console.error('Failed to load data from storage:', e);
-      applyTheme('warm-espresso');
+      applyTheme();
     }
   }
 
@@ -1104,33 +1037,7 @@
     svgEl.innerHTML = paths;
   }
 
-  function renderThemePicker() {
-    const grid = document.getElementById('themePickerGrid');
-    if (!grid) return;
-
-    const currentThemeId = state.settings.theme || 'warm-espresso';
-
-    grid.innerHTML = THEMES.map(t => {
-      const isActive = t.id === currentThemeId;
-      return `
-        <div class="theme-card ${isActive ? 'active' : ''}" onclick="window.flatsplit.setTheme('${t.id}')">
-          <div class="theme-card-top">
-            <span class="theme-card-name">${escapeHtml(t.name)}</span>
-            <div class="theme-palette-preview">
-              <span class="theme-color-dot" style="background-color: ${t.colors[0]};"></span>
-              <span class="theme-color-dot" style="background-color: ${t.colors[1]};"></span>
-              <span class="theme-color-dot" style="background-color: ${t.colors[2]};"></span>
-            </div>
-          </div>
-          <div class="theme-card-desc">${escapeHtml(t.desc)}</div>
-        </div>
-      `;
-    }).join('');
-  }
-
   function renderSettingsView() {
-    renderThemePicker();
-
     const uInput = document.getElementById('settingsUserName');
     if (uInput && document.activeElement !== uInput) uInput.value = state.settings.userName;
 
@@ -1589,21 +1496,12 @@
         render();
         showToast('Recurring template removed');
       }
-    },
-    setTheme: function (themeId) {
-      applyTheme(themeId);
-      render();
-      const t = THEMES.find(x => x.id === themeId);
-      showToast(`Switched to ${t ? t.name : 'new'} theme ✨`);
     }
   };
 
   // --- Initialization & Event Listeners ---
   document.addEventListener('DOMContentLoaded', () => {
     loadData();
-
-    // Quick Theme Switcher Button in Header
-    document.getElementById('quickThemeBtn')?.addEventListener('click', cycleTheme);
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {

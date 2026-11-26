@@ -1,97 +1,7 @@
-/* FlatSplit - Design System & Mobile PWA Styles
-   Supports multiple curated themes:
-   - warm-espresso (Default): Artisanal dark roast, warm amber & golden cream
-   - electric-indigo: Modern high-tech fintech midnight with iris violet
-   - nordic-light: Scandinavian warm linen editorial daylight with deep teal
-   - sunset-terracotta: Twilight pomegranate & vibrant coral
-   - oled-stealth: True black high-contrast OLED with electric lime
-   - slate-emerald: Calm graphite with crisp mint
-*/
+/* Hisaab - Nordic Paper Design System & Mobile PWA Styles */
 
-:root, [data-theme="warm-espresso"] {
-  --theme-name: "warm-espresso";
-  --bg-app: #14110f;
-  --bg-desktop: #0a0807;
-  --bg-nav: rgba(20, 17, 15, 0.92);
-  --bg-surface: #1e1916;
-  --bg-surface-raised: #28221e;
-  --bg-surface-hover: #332b26;
-  --bg-elevated: #3e352f;
-
-  --border-subtle: rgba(245, 158, 11, 0.1);
-  --border-medium: rgba(245, 158, 11, 0.22);
-  --border-focus: #f59e0b;
-
-  --text-primary: #faf5ee;
-  --text-secondary: #c9bca9;
-  --text-muted: #8c7c68;
-
-  --accent-primary: #f59e0b;
-  --accent-primary-hover: #d97706;
-  --accent-subtle: rgba(245, 158, 11, 0.15);
-  --accent-text: #fbbf24;
-
-  --danger: #ef4444;
-  --danger-subtle: rgba(239, 68, 68, 0.14);
-  --warning: #f59e0b;
-  --warning-subtle: rgba(245, 158, 11, 0.14);
-  --info: #38bdf8;
-  --info-subtle: rgba(56, 189, 248, 0.14);
-
-  --chart-c1: #f59e0b;
-  --chart-c2: #fb923c;
-  --chart-c3: #eab308;
-  --chart-c4: #a8a29e;
-  --chart-c5: #f43f5e;
-  --chart-c6: #d97706;
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
-
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Theme 2: Electric Indigo */
-[data-theme="electric-indigo"] {
-  --theme-name: "electric-indigo";
-  --bg-app: #0b0e1a;
-  --bg-desktop: #05070e;
-  --bg-nav: rgba(11, 14, 26, 0.92);
-  --bg-surface: #13182c;
-  --bg-surface-raised: #1a213d;
-  --bg-surface-hover: #222b4e;
-  --bg-elevated: #2c3660;
-
-  --border-subtle: rgba(99, 102, 241, 0.12);
-  --border-medium: rgba(99, 102, 241, 0.24);
-  --border-focus: #818cf8;
-
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #4f46e5;
-  --accent-subtle: rgba(99, 102, 241, 0.16);
-  --accent-text: #a5b4fc;
-
-  --chart-c1: #6366f1;
-  --chart-c2: #8b5cf6;
-  --chart-c3: #06b6d4;
-  --chart-c4: #ec4899;
-  --chart-c5: #3b82f6;
-  --chart-c6: #a855f7;
-}
-
-/* Theme 3: Nordic Paper (Light Editorial) */
-[data-theme="nordic-light"] {
-  --theme-name: "nordic-light";
+:root {
+  --theme-name: "nordic-paper";
   --bg-app: #f6f4ee;
   --bg-desktop: #e8e5dc;
   --bg-nav: rgba(246, 244, 238, 0.94);
@@ -113,108 +23,30 @@
   --accent-subtle: rgba(15, 118, 110, 0.12);
   --accent-text: #0f766e;
 
+  --danger: #be123c;
+  --danger-subtle: rgba(190, 18, 60, 0.12);
+  --warning: #d97706;
+  --warning-subtle: rgba(217, 119, 6, 0.12);
+  --info: #0284c7;
+  --info-subtle: rgba(2, 132, 199, 0.12);
+
   --chart-c1: #0f766e;
   --chart-c2: #d97706;
   --chart-c3: #2563eb;
   --chart-c4: #7c3aed;
   --chart-c5: #be123c;
   --chart-c6: #4b5563;
-}
 
-/* Theme 4: Sunset Terracotta */
-[data-theme="sunset-terracotta"] {
-  --theme-name: "sunset-terracotta";
-  --bg-app: #180d11;
-  --bg-desktop: #0c0608;
-  --bg-nav: rgba(24, 13, 17, 0.92);
-  --bg-surface: #24131a;
-  --bg-surface-raised: #311c24;
-  --bg-surface-hover: #3f2530;
-  --bg-elevated: #4e2f3d;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 
-  --border-subtle: rgba(244, 63, 94, 0.12);
-  --border-medium: rgba(244, 63, 94, 0.22);
-  --border-focus: #fb7185;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  --text-primary: #fff1f2;
-  --text-secondary: #fecdd3;
-  --text-muted: #9f7582;
-
-  --accent-primary: #f43f5e;
-  --accent-primary-hover: #e11d48;
-  --accent-subtle: rgba(244, 63, 94, 0.16);
-  --accent-text: #fda4af;
-
-  --chart-c1: #f43f5e;
-  --chart-c2: #fb923c;
-  --chart-c3: #f59e0b;
-  --chart-c4: #e11d48;
-  --chart-c5: #fda4af;
-  --chart-c6: #be123c;
-}
-
-/* Theme 5: OLED Stealth (True Black & Neon Lime) */
-[data-theme="oled-stealth"] {
-  --theme-name: "oled-stealth";
-  --bg-app: #000000;
-  --bg-desktop: #050505;
-  --bg-nav: rgba(0, 0, 0, 0.94);
-  --bg-surface: #0d0d0d;
-  --bg-surface-raised: #171717;
-  --bg-surface-hover: #242424;
-  --bg-elevated: #2e2e2e;
-
-  --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-medium: rgba(255, 255, 255, 0.22);
-  --border-focus: #a3e635;
-
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-
-  --accent-primary: #84cc16;
-  --accent-primary-hover: #65a30d;
-  --accent-subtle: rgba(132, 204, 22, 0.16);
-  --accent-text: #bef264;
-
-  --chart-c1: #84cc16;
-  --chart-c2: #22d3ee;
-  --chart-c3: #facc15;
-  --chart-c4: #f43f5e;
-  --chart-c5: #a855f7;
-  --chart-c6: #38bdf8;
-}
-
-/* Theme 6: Slate & Emerald (Classic Dark) */
-[data-theme="slate-emerald"] {
-  --theme-name: "slate-emerald";
-  --bg-app: #0a0e17;
-  --bg-desktop: #05070d;
-  --bg-nav: rgba(10, 14, 23, 0.92);
-  --bg-surface: #121824;
-  --bg-surface-raised: #182030;
-  --bg-surface-hover: #1f293d;
-  --bg-elevated: #242f45;
-
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.14);
-  --border-focus: #3b82f6;
-
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  --accent-primary: #10b981;
-  --accent-primary-hover: #059669;
-  --accent-subtle: rgba(16, 185, 129, 0.12);
-  --accent-text: #34d399;
-
-  --chart-c1: #10b981;
-  --chart-c2: #38bdf8;
-  --chart-c3: #a855f7;
-  --chart-c4: #f59e0b;
-  --chart-c5: #ec4899;
-  --chart-c6: #6366f1;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -228,6 +60,9 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   background-color: var(--bg-app);
   color: var(--text-primary);
@@ -238,21 +73,24 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* App Container (Phone shell style on desktop, full screen on phone) */
+/* App Container (Edge-to-edge on mobile, phone frame on desktop) */
 #app {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  max-width: 480px;
+  height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: 0 auto;
-  position: relative;
   background-color: var(--bg-app);
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
-@media (min-width: 481px) {
+@media (min-width: 768px) {
   body {
     display: flex;
     align-items: center;
@@ -260,9 +98,13 @@ html, body {
     background-color: var(--bg-desktop);
   }
   #app {
-    height: 94vh;
+    position: relative;
+    max-width: 480px;
+    height: 92vh;
+    max-height: 880px;
     border-radius: 28px;
     border: 1px solid var(--border-subtle);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -305,26 +147,6 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.theme-quick-btn {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.theme-quick-btn:active {
-  background-color: var(--bg-surface-raised);
-  color: var(--text-primary);
-  transform: scale(0.95);
 }
 
 .month-stepper {
@@ -370,7 +192,7 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 16px;
-  padding-bottom: calc(76px + var(--safe-bottom));
+  padding-bottom: calc(68px + max(var(--safe-bottom), 14px));
   -webkit-overflow-scrolling: touch;
 }
 
@@ -405,7 +227,7 @@ html, body {
   border-radius: var(--radius-lg);
   margin-bottom: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 12px rgba(45, 35, 20, 0.06);
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -552,16 +374,6 @@ html, body {
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s ease;
-}
-
-[data-theme="warm-espresso"] .banner-action-btn {
-  color: #1a1005;
-}
-[data-theme="oled-stealth"] .banner-action-btn {
-  color: #000000;
-}
-[data-theme="slate-emerald"] .banner-action-btn {
-  color: #042f2e;
 }
 
 .banner-action-btn:active {
@@ -953,7 +765,7 @@ html, body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border-subtle);
-  padding-bottom: var(--safe-bottom);
+  padding-bottom: max(var(--safe-bottom), 12px);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   z-index: 30;
@@ -1010,7 +822,7 @@ html, body {
 /* Floating Action Button (FAB) */
 .fab-btn {
   position: absolute;
-  bottom: calc(72px + var(--safe-bottom));
+  bottom: calc(64px + max(var(--safe-bottom), 12px));
   right: 18px;
   width: 52px;
   height: 52px;
@@ -1022,19 +834,9 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35);
   z-index: 25;
   transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-[data-theme="warm-espresso"] .fab-btn {
-  color: #1a1005;
-}
-[data-theme="oled-stealth"] .fab-btn {
-  color: #000000;
-}
-[data-theme="slate-emerald"] .fab-btn {
-  color: #042f2e;
 }
 
 .fab-btn:active {
@@ -1524,66 +1326,6 @@ html, body {
   margin-bottom: 14px;
 }
 
-/* Theme Gallery Picker in Settings */
-.theme-picker-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.theme-card {
-  background-color: var(--bg-surface-raised);
-  border: 1.5px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.15s ease;
-}
-
-.theme-card:hover {
-  border-color: var(--border-medium);
-}
-
-.theme-card.active {
-  border-color: var(--accent-primary);
-  background-color: var(--accent-subtle);
-}
-
-.theme-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.theme-card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.theme-palette-preview {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.theme-color-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-.theme-card-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.3;
-}
-
 .template-item {
   background-color: var(--bg-surface-raised);
   border: 1px solid var(--border-subtle);
@@ -1635,7 +1377,7 @@ html, body {
 /* Toast Notifications */
 .toast-container {
   position: fixed;
-  bottom: calc(76px + var(--safe-bottom));
+  bottom: calc(72px + max(var(--safe-bottom), 12px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1648,14 +1390,14 @@ html, body {
 }
 
 .toast {
-  background-color: var(--bg-elevated);
+  background-color: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 500;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(45, 35, 20, 0.12);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1701,7 +1443,7 @@ html, body {
   border-left: 3.5px solid #10b981;
   border-radius: var(--radius-lg);
   padding: 14px 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 12px rgba(45, 35, 20, 0.06);
 }
 
 .grocery-batch-card.pending {
