@@ -55,7 +55,40 @@
 
 ---
 
-## 🚀 Quick Start & Mobile Usage
+## 🌐 Deploy to GitHub Pages (Free Hosting & Mobile Install)
+
+Hisaab is 100% static, uses relative paths, and comes pre-configured with `.nojekyll`, `404.html`, and an automated GitHub Actions deployment workflow.
+
+### 1. Create a Repository on GitHub
+1. Go to [github.com/new](https://github.com/new).
+2. Name your repository (e.g. `hisaab` or `Splitwise`).
+3. Choose **Public** (or Private if you have GitHub Pro/Enterprise).
+4. Do **not** check "Initialize with README", then click **Create repository**.
+
+### 2. Push Your Local Code
+Run these commands from this directory in your terminal:
+
+```bash
+git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO_NAME>.git
+git branch -M main
+git push -u origin main
+```
+
+### 3. Turn on GitHub Pages (Takes 10 Seconds)
+1. Go to your GitHub repository on github.com.
+2. Click **Settings** ➔ **Pages** (in the left sidebar).
+3. Under **Build and deployment** ➔ **Source**:
+   - Choose **GitHub Actions** (recommended — uses the included automated workflow), **OR**
+   - Choose **Deploy from a branch** ➔ select `main` branch ➔ folder `/ (root)` ➔ click **Save**.
+4. In about 30 seconds, your PWA will be live at:
+   ```
+   https://<YOUR_GITHUB_USERNAME>.github.io/<YOUR_REPO_NAME>/
+   ```
+5. Open that link on your phone in Safari or Chrome, tap **"Add to Home Screen"**, and you have your app running anywhere, anytime!
+
+---
+
+## 🚀 Local Usage on Wi-Fi (Alternative)
 
 ### Step 1: Start the Local Server
 From this project directory in your terminal, run:
