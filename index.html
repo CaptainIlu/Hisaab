@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Hisaab • Flatmate Expense Tracker & Splitwise Sync</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="Effortless flatmate expense tracker and monthly Splitwise sync manager">
+  <meta name="theme-color" content="#14110f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hisaab">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon-192.svg">
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- Top App Bar -->
+  <header class="top-nav">
+    <div class="brand">
+      <img src="./icons/icon-192.svg" alt="Hisaab Logo" class="brand-icon">
+      <span class="brand-title">Hisaab</span>
+    </div>
+
+    <div class="top-nav-actions">
+      <!-- Quick Theme Cycle Button -->
+      <button class="theme-quick-btn" id="quickThemeBtn" title="Change Theme" aria-label="Change Theme">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2Z"/></svg>
+      </button>
+
+      <!-- Month Switcher Stepper -->
+      <div class="month-stepper">
+        <button class="stepper-btn" id="prevMonthBtn" aria-label="Previous Month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="current-month-label" id="currentMonthLabel">Nov 2026</span>
+        <button class="stepper-btn" id="nextMonthBtn" aria-label="Next Month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Views Viewport -->
+  <main class="views-viewport">
+
+    <!-- VIEW 1: EXPENSES TAB -->
+    <section id="view-expenses" class="view-pane active">
+
+      <!-- New Month Recurring Setup Banner -->
+      <div id="recurringPromptBanner" class="recurring-banner" style="display: none;"></div>
+
+      <!-- Hero Monthly Summary Card -->
+      <div class="summary-card">
+        <div class="summary-header">
+          <span class="summary-label">Monthly Flat Spend</span>
+          <span id="summaryBalanceBadge" class="summary-badge badge-balanced">All settled up</span>
+        </div>
+        <div class="summary-total" id="summaryTotalSpend">₹ 0</div>
+
+        <div class="summary-grid">
+          <div class="summary-stat-box">
+            <div class="stat-who" id="statLabelUser">Shivam paid</div>
+            <div class="stat-amount" id="summaryUserPaid">₹ 0</div>
+          </div>
+          <div class="summary-stat-box">
+            <div class="stat-who" id="statLabelFlatmate">Flatmate paid</div>
+            <div class="stat-amount" id="summaryFlatmatePaid">₹ 0</div>
+          </div>
+        </div>
+
+        <!-- Splitwise Mini Tracker in Card -->
+        <div class="splitwise-mini-tracker" id="heroSplitwiseTracker">
+          <div class="mini-tracker-top">
+            <span class="mini-tracker-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Splitwise Status
+            </span>
+            <span class="mini-tracker-value" id="miniSplitwiseValue">0 of 0 synced</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="miniSplitwiseBar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Static Monthly Bills (Screenshot 2 Match) -->
+      <div id="pendingBillsContainer" style="display: none;"></div>
+
+      <!-- Filter Chips -->
+      <div class="filter-bar">
+        <button class="chip-btn expense-filter-chip active" data-filter="all" id="chipFilterAll">
+          All <span class="chip-count">0</span>
+        </button>
+        <button class="chip-btn expense-filter-chip" data-filter="pending" id="chipFilterPending">
+          Pending Splitwise <span class="chip-count">0</span>
+        </button>
+        <button class="chip-btn expense-filter-chip" data-filter="synced" id="chipFilterSynced">
+          In Splitwise <span class="chip-count">0</span>
+        </button>
+      </div>
+
+      <!-- Expense Cards List -->
+      <div class="expense-list" id="expenseList">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: ANALYSIS TAB -->
+    <section id="view-analysis" class="view-pane">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title" id="analysisMonthTitle">Monthly Breakdown</span>
+          <span class="summary-label" id="analysisDailyAvg">Avg ₹ 0/day</span>
+        </div>
+
+        <!-- Donut Chart -->
+        <div class="donut-container">
+          <svg class="donut-svg" id="donutSvg" viewBox="0 0 170 170"></svg>
+          <div class="donut-center-text">
+            <div class="donut-center-total" id="donutCenterTotal">₹ 0</div>
+            <div class="donut-center-sub">Total Flat Spend</div>
+          </div>
+        </div>
+
+        <!-- Ranked Category Breakdown List -->
+        <div class="category-breakdown-list" id="categoryBreakdownList">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Flatmate Contribution Share Visualizer -->
+      <div class="split-ratio-card">
+        <div class="chart-title">Payment Contribution</div>
+        <div class="split-ratio-bar-track" id="splitRatioBarTrack">
+          <div class="split-ratio-seg-user" style="width: 50%;"></div>
+          <div class="split-ratio-seg-flatmate" style="width: 50%;"></div>
+        </div>
+        <div class="split-ratio-legend">
+          <span id="analysisUserLegend">● You: ₹ 0</span>
+          <span id="analysisFlatmateLegend">● Flatmate: ₹ 0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SPLITWISE SYNC ASSISTANT -->
+    <section id="view-splitwise" class="view-pane">
+      <div class="splitwise-hero-card">
+        <div class="splitwise-hero-row">
+          <div>
+            <div class="summary-label">Splitwise Tracker</div>
+            <div class="summary-total" style="font-size: 24px; margin-bottom: 2px;" id="splitwisePendingAmount">₹ 0</div>
+            <div style="font-size: 13px; color: var(--text-secondary);" id="splitwisePendingCount">0 expenses pending</div>
+          </div>
+          <span class="splitwise-status-tag tag-pending">Pending Entry</span>
+        </div>
+
+        <div class="action-row-buttons">
+          <button class="batch-btn accent" id="copySplitwiseBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            Copy Summary
+          </button>
+          <button class="batch-btn" id="markAllSplitwiseBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Mark All Added
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="chip-btn splitwise-filter-chip active" data-filter="pending">Pending</button>
+        <button class="chip-btn splitwise-filter-chip" data-filter="synced">Already in Splitwise</button>
+        <button class="chip-btn splitwise-filter-chip" data-filter="all">All</button>
+      </div>
+
+      <!-- Bi-Monthly Grocery Batches Section (1-15 & 16-End) -->
+      <div class="grocery-batch-section" id="groceryBatchesSection">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="section-header" id="otherExpensesSectionHeader" style="margin-top: 10px; margin-bottom: 8px;">
+        <span class="section-title">Other Flat Expenses</span>
+      </div>
+
+      <!-- Checklist for marking expenses into Splitwise -->
+      <div class="recurring-checklist" id="splitwiseChecklist">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: SETTINGS & RECURRING EXPENSES CONFIG -->
+    <section id="view-settings" class="view-pane">
+      <!-- Theme & Appearance Gallery -->
+      <div class="settings-group">
+        <div class="settings-group-title">Theme & Color Palette</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Choose an aesthetic that matches your mood. Tap any theme to apply immediately:
+        </p>
+        <div class="theme-picker-grid" id="themePickerGrid">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Flatmate Profile Settings -->
+      <div class="settings-group">
+        <div class="settings-group-title">Flatmates & Currency</div>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input type="text" class="form-input" id="settingsUserName" placeholder="Shivam">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Flatmate's Name</label>
+          <input type="text" class="form-input" id="settingsFlatmateName" placeholder="Roommate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Currency Symbol</label>
+          <input type="text" class="form-input" id="settingsCurrency" placeholder="₹" style="max-width: 80px;">
+        </div>
+      </div>
+
+      <!-- Configurable Monthly Recurring Templates -->
+      <div class="settings-group">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div class="settings-group-title" style="margin-bottom: 0;">Static Monthly Expenses</div>
+          <button class="section-action" id="addNewTemplateBtn">+ Add New</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          These static expenses prompt you at the beginning of each new month.
+        </p>
+        <div id="recurringTemplatesList">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Data Backup & Restore -->
+      <div class="settings-group">
+        <div class="settings-group-title">Data Backup</div>
+        <button class="btn-secondary" id="exportDataBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Data Backup (JSON)
+        </button>
+        <label class="btn-secondary" style="cursor: pointer; margin-top: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import Data Backup (JSON)
+          <input type="file" id="importDataInput" accept=".json" style="display: none;">
+        </label>
+      </div>
+
+      <!-- Mobile PWA Installation Tip -->
+      <div class="settings-group" style="border: 1px dashed var(--border-medium);">
+        <div class="settings-group-title">Phone PWA Installation</div>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+          • <strong>iPhone / iOS:</strong> Open in Safari, tap the <strong>Share</strong> button (box with arrow), then select <strong>"Add to Home Screen"</strong>.<br>
+          • <strong>Android:</strong> Open in Chrome, tap the <strong>⋮</strong> menu, and select <strong>"Install App"</strong>.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Action Button: Add Expense -->
+  <button class="fab-btn" id="mainFabBtn" aria-label="Add Expense">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  </button>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-tab="expenses">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Expenses</span>
+    </button>
+    <button class="nav-tab" data-tab="analysis">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+      <span>Analysis</span>
+    </button>
+    <button class="nav-tab" data-tab="splitwise">
+      <div class="tab-badge" id="splitwiseTabBadge" style="display: none;">0</div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+      <span>Splitwise</span>
+    </button>
+    <button class="nav-tab" data-tab="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- MODAL 1: ADD / EDIT EXPENSE SHEET -->
+  <div class="sheet-backdrop" id="expenseModalBackdrop">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <h3 class="sheet-title" id="expenseModalTitle">Add Flat Expense</h3>
+        <button class="sheet-close-btn" id="closeExpenseModalBtn">✕</button>
+      </div>
+
+      <form id="expenseForm" class="sheet-body">
+        <input type="hidden" id="formExpenseId">
+        <input type="hidden" id="formExpenseTemplateId">
+
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <div class="amount-input-box">
+            <span class="currency-affix">₹</span>
+            <input type="number" step="any" class="form-input amount-input" id="formExpenseAmount" placeholder="0" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description / Title</label>
+          <input type="text" class="form-input" id="formExpenseTitle" placeholder="e.g. Electricity Bill, Blinkit, Milk" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="formExpenseCategory"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Paid By</label>
+          <select class="form-select" id="formExpensePaidBy"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="formExpenseDate" required>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 12px; margin-bottom: 12px;">
+          <input type="checkbox" id="formExpenseInSplitwise" style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+          <label for="formExpenseInSplitwise" style="font-size: 13px; color: var(--text-primary); cursor: pointer;">
+            Already added to Splitwise app
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes (Optional)</label>
+          <input type="text" class="form-input" id="formExpenseNotes" placeholder="Bill period, UPI ref, etc.">
+        </div>
+
+        <button type="submit" class="btn-primary">Save Expense</button>
+        <button type="button" class="btn-secondary" id="formExpenseSkipBtn" style="color: var(--text-muted); display: none;">Skip This Bill for Current Month</button>
+        <button type="button" class="btn-secondary" id="formExpenseDeleteBtn" style="color: var(--danger); display: none;">Delete Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: MONTH START RECURRING CHECKLIST SHEET -->
+  <div class="sheet-backdrop" id="recurringModalBackdrop">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <h3 class="sheet-title" id="recurringModalTitle">Monthly Static Expenses</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Review amounts and add all in 1 tap</p>
+        </div>
+        <button class="sheet-close-btn" id="closeRecurringModalBtn">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <div class="recurring-checklist" id="recurringModalChecklist">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <button type="button" class="btn-primary" id="submitRecurringBatchBtn">
+          Add Selected Expenses
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: RECURRING TEMPLATE EDITOR -->
+  <div class="sheet-backdrop" id="templateModalBackdrop">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <h3 class="sheet-title" id="tplModalTitle">Recurring Expense</h3>
+        <button class="sheet-close-btn" id="closeTemplateModalBtn">✕</button>
+      </div>
+
+      <form id="templateForm" class="sheet-body">
+        <input type="hidden" id="tplId">
+
+        <div class="form-group">
+          <label class="form-label">Expense Title</label>
+          <input type="text" class="form-input" id="tplTitle" placeholder="e.g. Society Maintenance" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="tplCategory"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estimated / Default Amount</label>
+          <input type="number" step="any" class="form-input" id="tplAmount" placeholder="e.g. 2500" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Scheduled Day of Month (1 - 31)</label>
+          <input type="number" min="1" max="31" class="form-input" id="tplDayOfMonth" placeholder="e.g. 18 for 18th of every month" required>
+          <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">The day each month this bill typically occurs</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Default Payer</label>
+          <select class="form-select" id="tplPaidBy"></select>
+        </div>
+
+        <button type="submit" class="btn-primary">Save Template</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
