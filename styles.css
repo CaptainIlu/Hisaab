@@ -335,47 +335,6 @@ html, body {
   filter: brightness(0.92);
 }
 
-/* Recurring Reminder Banner (Retained as subtle fallback) */
-.recurring-banner {
-  display: none;
-}
-
-.banner-content {
-  flex: 1;
-}
-
-.banner-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
-}
-
-.banner-subtitle {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.banner-action-btn {
-  background-color: var(--accent-primary);
-  color: #ffffff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-}
-
-.banner-action-btn:active {
-  opacity: 0.85;
-}
-
 /* Month Summary Hero Card */
 .summary-card {
   background-color: var(--bg-surface);

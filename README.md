@@ -15,14 +15,11 @@
   - Payment contribution ratio visualizer (Your share vs Flatmate's share).
   - Daily average spend metric.
 
-### 2. ⚡ Automated New Month Static Expenses Setup
-- As soon as a new month starts, Hisaab prompts you with a checklist banner:
-  > *"✨ November Static Expenses — Add Society, Electricity, Maid & flat bills"*
-- Tapping **"Review & Add"** opens the monthly setup sheet:
-  - Pre-filled with your configurable recurring bills (Society Dues, Maid Salary, Cook Salary, Gas Cylinder, WiFi Broadband, etc.).
-  - Variable expenses (like Electricity) can be quickly edited in-place with the current month's bill amount.
-  - Single tap **"Add Selected Expenses"** generates all recurring expenses tagged for that month and marked as pending for Splitwise.
-- **Fully Configurable in Settings**: Add, edit, remove, or change default amounts and payers for recurring bills anytime.
+### 2. ⚡ Monthly Flat Bills Tracking (Statement Due-Date Engine)
+- Recurring apartment bills (Society Dues, Electricity, Maid, Cook, Gas, WiFi) are tracked by their scheduled statement dates (e.g. WiFi on the 10th, Electricity on the 18th).
+- As each bill becomes due, Hisaab flags it in the **"Monthly Flat Bills · Needs Update"** section (e.g., *"Statement date 18-11-2026 · not updated after 8 days"*).
+- Tapping **"Add Bill Details"** opens an inline confirmation modal to quickly enter the exact amount (crucial for fluctuating bills like Electricity) or skip that bill for the month.
+- **Fully Configurable in Settings**: Add, edit, remove, or change default amounts, day of month (1-31), and payers for recurring bills anytime.
 
 ### 3. 🔄 Splitwise Sync Tracker & Bi-Monthly Grocery Batches
 - Designed specifically for entering expenses into the official Splitwise app:

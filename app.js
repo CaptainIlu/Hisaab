@@ -378,7 +378,6 @@
   // --- Rendering UI ---
   function render() {
     renderMonthHeader();
-    renderRecurringBanner();
     renderSummaryCard();
     renderExpensesView();
     renderSplitwiseView();
@@ -391,32 +390,6 @@
     const labelEl = document.getElementById('currentMonthLabel');
     if (labelEl) {
       labelEl.textContent = formatMonthName(state.currentMonth);
-    }
-  }
-
-  function renderRecurringBanner() {
-    const bannerEl = document.getElementById('recurringPromptBanner');
-    if (!bannerEl) return;
-
-    const curMonth = state.currentMonth;
-    const isProcessed = state.processedRecurringMonths[curMonth];
-    const isDismissed = state.dismissedRecurringBanners[curMonth];
-
-    if (!isProcessed && !isDismissed) {
-      bannerEl.style.display = 'flex';
-      const mName = formatMonthName(curMonth);
-      bannerEl.innerHTML = `
-        <div class="banner-content">
-          <div class="banner-title">
-            ${getIconSvg('sparkles', 15)} ${mName} Static Expenses
-          </div>
-          <div class="banner-subtitle">Add Society, Electricity, Maid & flat bills</div>
-        </div>
-        <button class="banner-action-btn" id="openRecurringPromptBtn">Review & Add</button>
-      `;
-      document.getElementById('openRecurringPromptBtn')?.addEventListener('click', openRecurringModal);
-    } else {
-      bannerEl.style.display = 'none';
     }
   }
 
@@ -1205,84 +1178,6 @@
     if (sheet) sheet.classList.remove('active');
   }
 
-  // Recurring Month Checklist Modal
-  function openRecurringModal() {
-    const sheet = document.getElementById('recurringModalBackdrop');
-    if (!sheet) return;
-
-    const titleEl = document.getElementById('recurringModalTitle');
-    if (titleEl) titleEl.textContent = `${formatMonthName(state.currentMonth)} Static Expenses`;
-
-    const listEl = document.getElementById('recurringModalChecklist');
-    if (!listEl) return;
-
-    const uName = state.settings.userName;
-    const fName = state.settings.flatmateName;
-
-    listEl.innerHTML = state.recurringTemplates.filter(t => t.active).map((tpl, i) => {
-      const payer = tpl.defaultPaidBy === 'flatmate' ? fName : uName;
-      return `
-        <div class="checklist-item selected" id="recRow_${tpl.id}">
-          <input type="checkbox" class="checklist-check rec-check" data-id="${tpl.id}" checked>
-          <div class="checklist-info">
-            <div class="checklist-name">${escapeHtml(tpl.title)}</div>
-            <div class="checklist-sub">${escapeHtml(tpl.category)} • Paid by ${escapeHtml(payer)}</div>
-          </div>
-          <div class="amount-input-box" style="width: 100px;">
-            <span class="currency-affix" style="left: 6px; font-size: 13px;">${state.settings.currency}</span>
-            <input type="number" class="checklist-input rec-amount" data-id="${tpl.id}" value="${tpl.defaultAmount}" style="width: 100%; padding-left: 20px;">
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    sheet.classList.add('active');
-  }
-
-  function closeRecurringModal() {
-    const sheet = document.getElementById('recurringModalBackdrop');
-    if (sheet) sheet.classList.remove('active');
-  }
-
-  function submitRecurringModal() {
-    const checks = document.querySelectorAll('.rec-check');
-    let addedCount = 0;
-    const curMonth = state.currentMonth;
-
-    checks.forEach(chk => {
-      if (chk.checked) {
-        const id = chk.dataset.id;
-        const tpl = state.recurringTemplates.find(t => t.id === id);
-        if (tpl) {
-          const amtInput = document.querySelector(`.rec-amount[data-id="${id}"]`);
-          const amt = amtInput ? (parseFloat(amtInput.value) || 0) : tpl.defaultAmount;
-
-          const newExp = {
-            id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-            title: tpl.title,
-            amount: amt,
-            date: `${curMonth}-01`,
-            month: curMonth,
-            category: tpl.category,
-            paidBy: tpl.defaultPaidBy || 'user',
-            split: 'equal',
-            inSplitwise: false,
-            isRecurring: true,
-            notes: 'Generated from monthly template'
-          };
-          state.expenses.push(newExp);
-          addedCount++;
-        }
-      }
-    });
-
-    state.processedRecurringMonths[curMonth] = true;
-    saveData();
-    closeRecurringModal();
-    render();
-    showToast(`Added ${addedCount} recurring expenses for ${formatMonthName(curMonth)}!`);
-  }
-
   // --- Splitwise Helper Features ---
   function toggleSplitwiseStatus(expenseId, event) {
     if (event) event.stopPropagation();
@@ -1534,7 +1429,6 @@
     // FAB Add Expense
     document.getElementById('mainFabBtn')?.addEventListener('click', () => openAddExpenseModal());
     document.getElementById('closeExpenseModalBtn')?.addEventListener('click', closeAddExpenseModal);
-    document.getElementById('closeRecurringModalBtn')?.addEventListener('click', closeRecurringModal);
 
     // Expense Form Submit
     document.getElementById('expenseForm')?.addEventListener('submit', (e) => {
@@ -1620,9 +1514,6 @@
         showToast('Expense deleted');
       }
     });
-
-    // Recurring Submit
-    document.getElementById('submitRecurringBatchBtn')?.addEventListener('click', submitRecurringModal);
 
     // Splitwise View Actions
     document.getElementById('copySplitwiseBtn')?.addEventListener('click', copySplitwiseSummary);

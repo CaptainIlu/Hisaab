@@ -47,9 +47,6 @@
     <!-- VIEW 1: EXPENSES TAB -->
     <section id="view-expenses" class="view-pane active">
 
-      <!-- New Month Recurring Setup Banner -->
-      <div id="recurringPromptBanner" class="recurring-banner" style="display: none;"></div>
-
       <!-- Hero Monthly Summary Card -->
       <div class="summary-card">
         <div class="summary-header">
@@ -333,31 +330,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: MONTH START RECURRING CHECKLIST SHEET -->
-  <div class="sheet-backdrop" id="recurringModalBackdrop">
-    <div class="bottom-sheet">
-      <div class="sheet-drag-handle"></div>
-      <div class="sheet-header">
-        <div>
-          <h3 class="sheet-title" id="recurringModalTitle">Monthly Static Expenses</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Review amounts and add all in 1 tap</p>
-        </div>
-        <button class="sheet-close-btn" id="closeRecurringModalBtn">✕</button>
-      </div>
-
-      <div class="sheet-body">
-        <div class="recurring-checklist" id="recurringModalChecklist">
-          <!-- Rendered dynamically -->
-        </div>
-
-        <button type="button" class="btn-primary" id="submitRecurringBatchBtn">
-          Add Selected Expenses
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: RECURRING TEMPLATE EDITOR -->
+  <!-- MODAL 2: RECURRING TEMPLATE EDITOR -->
   <div class="sheet-backdrop" id="templateModalBackdrop">
     <div class="bottom-sheet">
       <div class="sheet-drag-handle"></div>
