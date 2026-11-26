@@ -84,6 +84,13 @@
       <!-- Pending Static Monthly Bills (Screenshot 2 Match) -->
       <div id="pendingBillsContainer" style="display: none;"></div>
 
+      <!-- Search Input Bar -->
+      <div class="search-bar-box">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="expenseSearchInput" class="search-input" placeholder="Search by title, notes, or payer..." autocomplete="off">
+        <button id="clearSearchBtn" class="search-clear-btn" style="display: none;" aria-label="Clear Search">✕</button>
+      </div>
+
       <!-- Filter Chips -->
       <div class="filter-bar">
         <button class="chip-btn expense-filter-chip active" data-filter="all" id="chipFilterAll">
@@ -95,6 +102,11 @@
         <button class="chip-btn expense-filter-chip" data-filter="synced" id="chipFilterSynced">
           In Splitwise <span class="chip-count">0</span>
         </button>
+      </div>
+
+      <!-- Category Filter Pills Bar (Horizontal Scroll) -->
+      <div class="category-scroll-bar" id="categoryScrollBar">
+        <!-- Rendered dynamically -->
       </div>
 
       <!-- Expense Cards List -->
@@ -161,6 +173,9 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
             Mark All Added
           </button>
+          <button class="batch-btn" id="syncAllSplitwiseApiBtn" style="display: none; background-color: var(--accent-primary); color: #ffffff;">
+            ⚡ Sync All (API)
+          </button>
         </div>
       </div>
 
@@ -201,6 +216,68 @@
         <div class="form-group">
           <label class="form-label">Currency Symbol</label>
           <input type="text" class="form-input" id="settingsCurrency" placeholder="₹" style="max-width: 80px;">
+        </div>
+      </div>
+
+      <!-- Splitwise Direct API Integration Settings -->
+      <div class="settings-group">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div class="settings-group-title" style="margin-bottom: 0;">Splitwise API Sync</div>
+          <span class="splitwise-status-tag" id="swStatusBadge">Not Connected</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+          Connect your Splitwise account to push bills & grocery cycles directly without manual copy-pasting.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Splitwise API Key</span>
+            <a href="https://secure.splitwise.com/apps" target="_blank" rel="noopener" style="color: var(--accent-text); font-size: 11px; text-decoration: none; font-weight: 500;">Get Key ↗</a>
+          </label>
+          <input type="password" class="form-input" id="settingsSwApiKey" placeholder="Paste your API Key">
+          <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">
+            Go to <em>splitwise.com/apps</em> ➔ "Register your application" to generate your API Key.
+          </span>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button type="button" class="btn-primary" id="swConnectBtn" style="flex: 1; padding: 10px 14px; font-size: 13px;">
+            Verify & Connect
+          </button>
+          <button type="button" class="btn-secondary" id="swDisconnectBtn" style="display: none; padding: 10px 14px; font-size: 13px; color: var(--danger);">
+            Disconnect
+          </button>
+        </div>
+
+        <div id="swGroupConfigContainer" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Select Splitwise Flat Group</label>
+            <select class="form-select" id="settingsSwGroupId">
+              <option value="">Loading groups...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Match Your Profile (<span id="swLabelYou">Shivam</span>)</label>
+            <select class="form-select" id="settingsSwUserMemberId"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Match Flatmate (<span id="swLabelFlatmate">Sanket</span>)</label>
+            <select class="form-select" id="settingsSwFlatmateMemberId"></select>
+          </div>
+
+          <details style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+            <summary style="cursor: pointer; padding: 4px 0; color: var(--accent-text); font-weight: 500;">
+              Proxy URL (Optional)
+            </summary>
+            <div style="margin-top: 8px;">
+              <input type="text" class="form-input" id="settingsSwProxyUrl" placeholder="Auto (Built-in for local server)">
+              <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">
+                Leave empty for automatic local proxy when running on Wi-Fi, or enter a custom CORS proxy URL.
+              </span>
+            </div>
+          </details>
         </div>
       </div>
 

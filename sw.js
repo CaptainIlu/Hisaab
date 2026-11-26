@@ -1,5 +1,5 @@
 // Service Worker for Hisaab PWA
-const CACHE_NAME = 'hisaab-v4';
+const CACHE_NAME = 'hisaab-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

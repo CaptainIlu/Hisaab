@@ -45,12 +45,22 @@
       userName: 'Shivam',
       flatmateName: 'Sanket',
       currency: '₹',
-      theme: 'nordic-paper'
+      theme: 'nordic-paper',
+      splitwiseApiKey: '',
+      splitwiseGroupId: '',
+      splitwiseGroupName: '',
+      splitwiseUserMemberId: '',
+      splitwiseFlatmateMemberId: '',
+      splitwiseProxyUrl: ''
     },
     activeTab: 'expenses',
     currentMonth: getTodayMonthString(), // 'YYYY-MM'
     activeFilter: 'all', // 'all' | 'pending' | 'synced'
-    splitwiseFilter: 'pending' // 'pending' | 'synced' | 'all'
+    categoryFilter: 'all',
+    searchQuery: '',
+    splitwiseFilter: 'pending', // 'pending' | 'synced' | 'all'
+    splitwiseGroups: [],
+    splitwiseConnected: false
   };
 
   function getThemeChartPalette() {
@@ -278,7 +288,9 @@
       'chevron-right': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
       'copy': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
       'trash': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`,
-      'edit': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
+      'edit': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+      'search': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+      'zap-bolt': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
     };
     return icons[name] || icons['tag'];
   }
@@ -540,6 +552,46 @@
     `;
   }
 
+  function renderCategoryScrollBar(monthExpenses) {
+    const container = document.getElementById('categoryScrollBar');
+    if (!container) return;
+
+    const categoryCounts = {};
+    monthExpenses.forEach(e => {
+      const cat = e.category || 'Miscellaneous';
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+
+    const activeCat = (state.categoryFilter || 'all').toLowerCase();
+    const allPill = `
+      <button class="cat-pill ${activeCat === 'all' ? 'active' : ''}" data-category="all">
+        All Categories <span class="cat-pill-count">${monthExpenses.length}</span>
+      </button>
+    `;
+
+    const sortedCats = Object.keys(categoryCounts).sort();
+    const pills = sortedCats.map(catName => {
+      const icon = getCategoryIcon(catName);
+      const isActive = activeCat === catName.toLowerCase();
+      return `
+        <button class="cat-pill ${isActive ? 'active' : ''}" data-category="${escapeHtml(catName)}">
+          ${getIconSvg(icon, 13)}
+          <span>${escapeHtml(catName)}</span>
+          <span class="cat-pill-count">${categoryCounts[catName]}</span>
+        </button>
+      `;
+    }).join('');
+
+    container.innerHTML = allPill + pills;
+
+    container.querySelectorAll('.cat-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.categoryFilter = btn.dataset.category;
+        renderExpensesView();
+      });
+    });
+  }
+
   function renderExpensesView() {
     renderPendingBills();
 
@@ -549,7 +601,20 @@
     const monthExpenses = getMonthExpenses();
     const pendingBills = getPendingStaticBills();
 
-    // Filter
+    // Render horizontal category bar
+    renderCategoryScrollBar(monthExpenses);
+
+    // Sync search input and clear button state
+    const sInput = document.getElementById('expenseSearchInput');
+    const sClearBtn = document.getElementById('clearSearchBtn');
+    if (sInput && document.activeElement !== sInput) {
+      sInput.value = state.searchQuery || '';
+    }
+    if (sClearBtn) {
+      sClearBtn.style.display = (state.searchQuery && state.searchQuery.length > 0) ? 'block' : 'none';
+    }
+
+    // 1. Status Filter
     let filtered = monthExpenses;
     if (state.activeFilter === 'pending') {
       filtered = monthExpenses.filter(e => !e.inSplitwise);
@@ -569,8 +634,50 @@
     const chipSynced = document.getElementById('chipFilterSynced');
     if (chipSynced) chipSynced.innerHTML = `In Splitwise <span class="chip-count">${countSynced}</span>`;
 
+    // 2. Category Filter
+    if (state.categoryFilter && state.categoryFilter !== 'all') {
+      const targetCat = state.categoryFilter.toLowerCase();
+      filtered = filtered.filter(e => (e.category || '').toLowerCase() === targetCat);
+    }
+
+    // 3. Search Query Filter
+    const query = (state.searchQuery || '').trim().toLowerCase();
+    if (query) {
+      filtered = filtered.filter(e => {
+        const title = (e.title || '').toLowerCase();
+        const notes = (e.notes || '').toLowerCase();
+        const cat = (e.category || '').toLowerCase();
+        const amt = String(e.amount || '');
+        const payer = (e.paidBy === 'user' ? state.settings.userName : state.settings.flatmateName).toLowerCase();
+        return title.includes(query) || notes.includes(query) || cat.includes(query) || amt.includes(query) || payer.includes(query);
+      });
+    }
+
     if (filtered.length === 0) {
-      if (pendingBills.length > 0 && state.activeFilter !== 'synced') {
+      const hasActiveFilters = Boolean(query || (state.categoryFilter && state.categoryFilter !== 'all') || state.activeFilter !== 'all');
+      if (hasActiveFilters && monthExpenses.length > 0) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">${getIconSvg('search', 36)}</div>
+            <div class="empty-title">No matching expenses</div>
+            <div class="empty-desc">No expenses match your search query or category filter.</div>
+            <button class="btn-secondary" id="resetSearchFiltersBtn" style="margin-top: 14px; max-width: 170px;">
+              Clear Filters
+            </button>
+          </div>
+        `;
+        document.getElementById('resetSearchFiltersBtn')?.addEventListener('click', () => {
+          state.searchQuery = '';
+          state.categoryFilter = 'all';
+          state.activeFilter = 'all';
+          if (sInput) sInput.value = '';
+          if (sClearBtn) sClearBtn.style.display = 'none';
+          document.querySelectorAll('.expense-filter-chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.filter === 'all');
+          });
+          renderExpensesView();
+        });
+      } else if (pendingBills.length > 0 && state.activeFilter !== 'synced') {
         listEl.innerHTML = `
           <div style="text-align: center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;">
             Update your monthly static bills above or tap + to log extra expenses.
@@ -735,6 +842,334 @@
     showToast(`Copied Groceries Cycle ${cycleNum} summary!`);
   }
 
+  // --- Splitwise Direct API Service ---
+  const SplitwiseService = {
+    getBaseUrl() {
+      if (state.settings.splitwiseProxyUrl && state.settings.splitwiseProxyUrl.trim()) {
+        return state.settings.splitwiseProxyUrl.trim().replace(/\/+$/, '');
+      }
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '8080') {
+        return window.location.origin + '/api/splitwise';
+      }
+      return 'https://secure.splitwise.com/api/v3.0';
+    },
+
+    async request(endpoint, options = {}) {
+      const apiKey = state.settings.splitwiseApiKey;
+      if (!apiKey) throw new Error('Splitwise API Key not set.');
+
+      const baseUrl = this.getBaseUrl();
+      const url = `${baseUrl}/${endpoint.replace(/^\/+/, '')}`;
+
+      const headers = {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json',
+        ...(options.headers || {})
+      };
+
+      try {
+        const resp = await fetch(url, { ...options, headers });
+        const data = await resp.json().catch(() => null);
+        if (!resp.ok) {
+          let errorMsg = `Splitwise Error (${resp.status})`;
+          if (data && data.errors) {
+            errorMsg = typeof data.errors === 'string' ? data.errors : (data.errors.base || Object.values(data.errors).join(', '));
+          }
+          throw new Error(errorMsg);
+        }
+        return data;
+      } catch (err) {
+        if (err.name === 'TypeError' && String(err).includes('fetch')) {
+          throw new Error('CORS_RESTRICTED');
+        }
+        throw err;
+      }
+    },
+
+    async getCurrentUser() {
+      return this.request('get_current_user');
+    },
+
+    async getGroups() {
+      return this.request('get_groups');
+    },
+
+    async createExpense(expensePayload) {
+      return this.request('create_expense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(expensePayload)
+      });
+    }
+  };
+
+  function isSplitwiseConfigured() {
+    return Boolean(
+      state.settings.splitwiseApiKey &&
+      state.settings.splitwiseGroupId &&
+      state.settings.splitwiseUserMemberId &&
+      state.settings.splitwiseFlatmateMemberId
+    );
+  }
+
+  function handleSplitwiseApiError(err) {
+    if (err.message === 'CORS_RESTRICTED') {
+      alert(
+        "⚠️ Splitwise CORS Policy:\n\n" +
+        "Splitwise blocks direct API requests from browser static origins (GitHub Pages).\n\n" +
+        "How to use direct API sync:\n" +
+        "1. Run locally using 'python3 server.py' (built-in proxy handles it automatically on local Wi-Fi).\n" +
+        "2. Or specify your own Cloudflare Worker proxy in Settings.\n\n" +
+        "Note: 'Copy Summary' and 'Copy for Splitwise' always work with 0 setup!"
+      );
+    } else {
+      showToast(`Splitwise API: ${err.message || err}`);
+    }
+  }
+
+  async function syncSingleExpense(expenseId, event) {
+    if (event) event.stopPropagation();
+
+    if (!isSplitwiseConfigured()) {
+      showToast('Connect Splitwise in Settings first');
+      document.querySelector('.nav-tab[data-tab="settings"]')?.click();
+      return;
+    }
+
+    const exp = state.expenses.find(e => e.id === expenseId);
+    if (!exp) return;
+
+    const cost = parseFloat(exp.amount) || 0;
+    if (cost <= 0) return;
+
+    const btn = event?.target?.closest('button');
+    const origText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Syncing...';
+    }
+
+    try {
+      const uMemberId = state.settings.splitwiseUserMemberId;
+      const fMemberId = state.settings.splitwiseFlatmateMemberId;
+
+      const payload = {
+        cost: cost.toFixed(2),
+        description: exp.title,
+        details: exp.notes || `Logged via Hisaab for ${formatMonthName(exp.month)}`,
+        date: exp.date,
+        group_id: parseInt(state.settings.splitwiseGroupId, 10),
+        users__0__user_id: parseInt(uMemberId, 10),
+        users__0__paid_share: exp.paidBy === 'user' ? cost.toFixed(2) : '0.00',
+        users__0__owed_share: (cost / 2).toFixed(2),
+        users__1__user_id: parseInt(fMemberId, 10),
+        users__1__paid_share: exp.paidBy === 'flatmate' ? cost.toFixed(2) : '0.00',
+        users__1__owed_share: (cost / 2).toFixed(2)
+      };
+
+      await SplitwiseService.createExpense(payload);
+      exp.inSplitwise = true;
+      saveData();
+      render();
+      showToast(`✓ Synced "${exp.title}" to Splitwise!`);
+    } catch (err) {
+      handleSplitwiseApiError(err);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = origText || '⚡ Sync';
+      }
+    }
+  }
+
+  async function syncGroceryBatch(cycleNum) {
+    if (!isSplitwiseConfigured()) {
+      showToast('Connect Splitwise in Settings first');
+      document.querySelector('.nav-tab[data-tab="settings"]')?.click();
+      return;
+    }
+
+    const batches = getGroceryBatches();
+    const batch = cycleNum === 1 ? batches.cycle1 : batches.cycle2;
+    if (batch.items.length === 0) {
+      showToast('No grocery receipts recorded in this cycle.');
+      return;
+    }
+
+    const uName = state.settings.userName;
+    const fName = state.settings.flatmateName;
+    const mName = formatMonthName(state.currentMonth);
+    const rangeLabel = cycleNum === 1 ? '1st – 15th' : '16th – End';
+
+    const card = document.getElementById(`groceryCardCycle${cycleNum}`);
+    const syncBtn = card?.querySelector('.sync-batch-btn');
+    if (syncBtn) {
+      syncBtn.disabled = true;
+      syncBtn.textContent = 'Syncing...';
+    }
+
+    const detailsLines = [
+      `Hisaab Bi-Monthly Collective Groceries (${mName} ${rangeLabel})`,
+      `Total: ${formatMoney(batch.total)} (Split 50/50: ${formatMoney(batch.total / 2)} each)`,
+      `Paid: ${uName} ${formatMoney(batch.userPaid)} | ${fName} ${formatMoney(batch.flatmatePaid)}`,
+      '',
+      'Receipts Breakdown:'
+    ];
+    batch.items.forEach((item, idx) => {
+      const payer = item.paidBy === 'user' ? uName : fName;
+      detailsLines.push(`${idx + 1}. ${formatDateShort(item.date)} - ${item.title}: ${formatMoney(item.amount)} (${payer})`);
+    });
+
+    const payload = {
+      cost: batch.total.toFixed(2),
+      description: `Groceries (${mName.split(' ')[0]} ${cycleNum === 1 ? '1-15' : '16-End'})`,
+      details: detailsLines.join('\n'),
+      date: batch.items[0]?.date || `${state.currentMonth}-${cycleNum === 1 ? '15' : '28'}`,
+      group_id: parseInt(state.settings.splitwiseGroupId, 10),
+      users__0__user_id: parseInt(state.settings.splitwiseUserMemberId, 10),
+      users__0__paid_share: batch.userPaid.toFixed(2),
+      users__0__owed_share: (batch.total / 2).toFixed(2),
+      users__1__user_id: parseInt(state.settings.splitwiseFlatmateMemberId, 10),
+      users__1__paid_share: batch.flatmatePaid.toFixed(2),
+      users__1__owed_share: (batch.total / 2).toFixed(2)
+    };
+
+    try {
+      await SplitwiseService.createExpense(payload);
+      batch.items.forEach(e => { e.inSplitwise = true; });
+      saveData();
+      render();
+      showToast(`✓ Synced Cycle ${cycleNum} groceries (${formatMoney(batch.total)}) to Splitwise!`);
+    } catch (err) {
+      handleSplitwiseApiError(err);
+      if (syncBtn) {
+        syncBtn.disabled = false;
+        syncBtn.textContent = '⚡ Sync to Splitwise';
+      }
+    }
+  }
+
+  async function syncAllPendingToSplitwise() {
+    if (!isSplitwiseConfigured()) {
+      showToast('Connect Splitwise in Settings first');
+      document.querySelector('.nav-tab[data-tab="settings"]')?.click();
+      return;
+    }
+
+    const batches = getGroceryBatches();
+    const monthExpenses = getMonthExpenses();
+    const nonGroceryPending = monthExpenses.filter(e => !isGroceryExpense(e) && !e.inSplitwise);
+
+    const hasCycle1Pending = batches.cycle1.items.some(e => !e.inSplitwise);
+    const hasCycle2Pending = batches.cycle2.items.some(e => !e.inSplitwise);
+
+    const totalToSync = (hasCycle1Pending ? 1 : 0) + (hasCycle2Pending ? 1 : 0) + nonGroceryPending.length;
+    if (totalToSync === 0) {
+      showToast('All expenses for this month are already in Splitwise!');
+      return;
+    }
+
+    const btn = document.getElementById('syncAllSplitwiseApiBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Syncing...';
+    }
+
+    let syncedCount = 0;
+    try {
+      if (hasCycle1Pending) {
+        await syncGroceryBatch(1);
+        syncedCount++;
+      }
+      if (hasCycle2Pending) {
+        await syncGroceryBatch(2);
+        syncedCount++;
+      }
+      for (const exp of nonGroceryPending) {
+        await syncSingleExpense(exp.id);
+        syncedCount++;
+      }
+      showToast(`✓ All ${syncedCount} items successfully synced to Splitwise!`);
+    } catch (err) {
+      handleSplitwiseApiError(err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '⚡ Sync All (API)';
+      }
+      render();
+    }
+  }
+
+  async function verifyAndConnectSplitwise() {
+    const keyInput = document.getElementById('settingsSwApiKey');
+    const key = (keyInput ? keyInput.value : state.settings.splitwiseApiKey || '').trim();
+    if (!key) {
+      showToast('Please enter your Splitwise API Key');
+      return;
+    }
+
+    const btn = document.getElementById('swConnectBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+    }
+
+    state.settings.splitwiseApiKey = key;
+
+    try {
+      const userResp = await SplitwiseService.getCurrentUser();
+      const user = userResp.user;
+
+      const groupsResp = await SplitwiseService.getGroups();
+      const groups = (groupsResp.groups || []).filter(g => g.id > 0);
+
+      state.splitwiseConnected = true;
+      state.splitwiseGroups = groups;
+
+      // If user hasn't selected a group yet, try to auto-select
+      if (!state.settings.splitwiseGroupId && groups.length > 0) {
+        state.settings.splitwiseGroupId = String(groups[0].id);
+        state.settings.splitwiseGroupName = groups[0].name;
+
+        // Auto-match user & flatmate IDs
+        const uNameLower = state.settings.userName.toLowerCase();
+        const fNameLower = state.settings.flatmateName.toLowerCase();
+        const uMember = groups[0].members.find(m => (m.first_name || '').toLowerCase().includes(uNameLower));
+        const fMember = groups[0].members.find(m => (m.first_name || '').toLowerCase().includes(fNameLower));
+        if (uMember) state.settings.splitwiseUserMemberId = String(uMember.id);
+        if (fMember) state.settings.splitwiseFlatmateMemberId = String(fMember.id);
+      }
+
+      saveData();
+      showToast(`Connected to Splitwise as ${user.first_name || user.email}!`);
+      renderSettingsView();
+      renderSplitwiseView();
+    } catch (err) {
+      state.splitwiseConnected = false;
+      handleSplitwiseApiError(err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = state.splitwiseConnected ? 'Refresh Connection' : 'Verify & Connect';
+      }
+    }
+  }
+
+  function disconnectSplitwise() {
+    if (confirm('Disconnect Splitwise integration?')) {
+      state.settings.splitwiseApiKey = '';
+      state.settings.splitwiseGroupId = '';
+      state.settings.splitwiseGroupName = '';
+      state.settings.splitwiseUserMemberId = '';
+      state.settings.splitwiseFlatmateMemberId = '';
+      state.splitwiseConnected = false;
+      state.splitwiseGroups = [];
+      saveData();
+      render();
+      showToast('Splitwise disconnected');
+    }
+  }
+
   function renderGroceryBatchesSection(mName, uName, fName) {
     const container = document.getElementById('groceryBatchesSection');
     if (!container) return;
@@ -801,7 +1236,12 @@
           </div>
 
           <div class="grocery-batch-actions">
-            <button class="grocery-batch-btn primary" onclick="window.flatsplit.copyGroceryBatch(${batch.cycleNum})">
+            ${isSplitwiseConfigured() && !isSynced ? `
+              <button class="grocery-batch-btn primary sync-batch-btn" onclick="window.flatsplit.syncGroceryBatch(${batch.cycleNum})">
+                ${getIconSvg('zap-bolt', 13)} Sync to Splitwise
+              </button>
+            ` : ''}
+            <button class="grocery-batch-btn ${isSplitwiseConfigured() && !isSynced ? '' : 'primary'}" onclick="window.flatsplit.copyGroceryBatch(${batch.cycleNum})">
               ${getIconSvg('copy', 13)} Copy for Splitwise
             </button>
             <button class="grocery-batch-btn" onclick="window.flatsplit.toggleGroceryBatch(${batch.cycleNum})">
@@ -884,7 +1324,14 @@
             <div class="checklist-name">${escapeHtml(exp.title)}</div>
             <div class="checklist-sub">${formatDateShort(exp.date)} • Paid by ${escapeHtml(payerName)} • Split equally</div>
           </div>
-          <div class="expense-amount">${formatMoney(exp.amount)}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="expense-amount">${formatMoney(exp.amount)}</div>
+            ${isSplitwiseConfigured() && !isSynced ? `
+              <button class="inline-sync-btn" onclick="window.flatsplit.syncSingleExpense('${exp.id}', event)">
+                ⚡ Sync
+              </button>
+            ` : ''}
+          </div>
         </div>
       `;
     }).join('');
@@ -900,6 +1347,12 @@
     const mName = formatMonthName(state.currentMonth);
     const uName = state.settings.userName;
     const fName = state.settings.flatmateName;
+
+    // Show or hide "Sync All (API)" button based on configuration
+    const syncAllBtn = document.getElementById('syncAllSplitwiseApiBtn');
+    if (syncAllBtn) {
+      syncAllBtn.style.display = isSplitwiseConfigured() && stats.pendingSplitwiseCount > 0 ? 'inline-flex' : 'none';
+    }
 
     // 1. Render Bi-Monthly Grocery Batches
     renderGroceryBatchesSection(mName, uName, fName);
@@ -1019,6 +1472,74 @@
 
     const currInput = document.getElementById('settingsCurrency');
     if (currInput && document.activeElement !== currInput) currInput.value = state.settings.currency;
+
+    // Splitwise API Section
+    const keyInput = document.getElementById('settingsSwApiKey');
+    if (keyInput && document.activeElement !== keyInput) {
+      keyInput.value = state.settings.splitwiseApiKey || '';
+    }
+
+    const proxyInput = document.getElementById('settingsSwProxyUrl');
+    if (proxyInput && document.activeElement !== proxyInput) {
+      proxyInput.value = state.settings.splitwiseProxyUrl || '';
+    }
+
+    const statusBadge = document.getElementById('swStatusBadge');
+    const groupContainer = document.getElementById('swGroupConfigContainer');
+    const disconnectBtn = document.getElementById('swDisconnectBtn');
+    const connectBtn = document.getElementById('swConnectBtn');
+    const groupSelect = document.getElementById('settingsSwGroupId');
+    const uMemberSelect = document.getElementById('settingsSwUserMemberId');
+    const fMemberSelect = document.getElementById('settingsSwFlatmateMemberId');
+    const labelYou = document.getElementById('swLabelYou');
+    const labelFlatmate = document.getElementById('swLabelFlatmate');
+
+    if (labelYou) labelYou.textContent = state.settings.userName;
+    if (labelFlatmate) labelFlatmate.textContent = state.settings.flatmateName;
+
+    const isConnected = Boolean(state.settings.splitwiseApiKey && (state.settings.splitwiseGroupId || state.splitwiseConnected));
+
+    if (isConnected) {
+      if (statusBadge) {
+        statusBadge.className = 'splitwise-status-tag tag-connected';
+        statusBadge.textContent = state.settings.splitwiseGroupName ? `Connected: ${state.settings.splitwiseGroupName}` : 'Connected';
+      }
+      if (groupContainer) groupContainer.style.display = 'block';
+      if (disconnectBtn) disconnectBtn.style.display = 'inline-block';
+      if (connectBtn) connectBtn.textContent = 'Refresh Connection';
+
+      // Populate groups if available
+      if (groupSelect && state.splitwiseGroups.length > 0) {
+        groupSelect.innerHTML = `<option value="">-- Choose a Splitwise Group --</option>` +
+          state.splitwiseGroups.map(g => `<option value="${g.id}" ${String(g.id) === String(state.settings.splitwiseGroupId) ? 'selected' : ''}>${escapeHtml(g.name)} (${g.members.length} members)</option>`).join('');
+
+        const selectedGroup = state.splitwiseGroups.find(g => String(g.id) === String(state.settings.splitwiseGroupId)) || state.splitwiseGroups[0];
+        if (selectedGroup && selectedGroup.members) {
+          const memberOptions = `<option value="">-- Select Member --</option>` +
+            selectedGroup.members.map(m => {
+              const fullName = `${m.first_name || ''} ${m.last_name || ''}`.trim();
+              return `<option value="${m.id}">${escapeHtml(fullName || m.email || 'Member ' + m.id)}</option>`;
+            }).join('');
+
+          if (uMemberSelect) {
+            uMemberSelect.innerHTML = memberOptions;
+            uMemberSelect.value = state.settings.splitwiseUserMemberId || '';
+          }
+          if (fMemberSelect) {
+            fMemberSelect.innerHTML = memberOptions;
+            fMemberSelect.value = state.settings.splitwiseFlatmateMemberId || '';
+          }
+        }
+      }
+    } else {
+      if (statusBadge) {
+        statusBadge.className = 'splitwise-status-tag';
+        statusBadge.textContent = 'Not Connected';
+      }
+      if (groupContainer) groupContainer.style.display = 'none';
+      if (disconnectBtn) disconnectBtn.style.display = 'none';
+      if (connectBtn) connectBtn.textContent = 'Verify & Connect';
+    }
 
     // Recurring Templates Manager
     const tListEl = document.getElementById('recurringTemplatesList');
@@ -1357,6 +1878,15 @@
   // --- Attach Global Handlers ---
   window.hisaab = window.flatsplit = {
     toggleSplitwise: toggleSplitwiseStatus,
+    syncSingleExpense: function (id, event) {
+      syncSingleExpense(id, event);
+    },
+    syncGroceryBatch: function (cycleNum) {
+      syncGroceryBatch(cycleNum);
+    },
+    syncAllSplitwiseApi: function () {
+      syncAllPendingToSplitwise();
+    },
     toggleGroceryBatch: function (cycleNum) {
       toggleGroceryBatch(cycleNum);
     },
@@ -1515,9 +2045,68 @@
       }
     });
 
+    // Expense Search & Clear
+    const searchInput = document.getElementById('expenseSearchInput');
+    searchInput?.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value;
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.style.display = state.searchQuery ? 'block' : 'none';
+      renderExpensesView();
+    });
+
+    document.getElementById('clearSearchBtn')?.addEventListener('click', () => {
+      state.searchQuery = '';
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
+      renderExpensesView();
+    });
+
     // Splitwise View Actions
     document.getElementById('copySplitwiseBtn')?.addEventListener('click', copySplitwiseSummary);
     document.getElementById('markAllSplitwiseBtn')?.addEventListener('click', markAllInSplitwise);
+    document.getElementById('syncAllSplitwiseApiBtn')?.addEventListener('click', syncAllPendingToSplitwise);
+
+    // Splitwise Settings Actions
+    document.getElementById('swConnectBtn')?.addEventListener('click', verifyAndConnectSplitwise);
+    document.getElementById('swDisconnectBtn')?.addEventListener('click', disconnectSplitwise);
+
+    document.getElementById('settingsSwApiKey')?.addEventListener('change', (e) => {
+      state.settings.splitwiseApiKey = e.target.value.trim();
+      saveData();
+    });
+
+    document.getElementById('settingsSwProxyUrl')?.addEventListener('change', (e) => {
+      state.settings.splitwiseProxyUrl = e.target.value.trim();
+      saveData();
+    });
+
+    document.getElementById('settingsSwGroupId')?.addEventListener('change', (e) => {
+      state.settings.splitwiseGroupId = e.target.value;
+      const selectedGroup = state.splitwiseGroups.find(g => String(g.id) === String(e.target.value));
+      if (selectedGroup) {
+        state.settings.splitwiseGroupName = selectedGroup.name;
+        const uNameLower = state.settings.userName.toLowerCase();
+        const fNameLower = state.settings.flatmateName.toLowerCase();
+        const uMember = selectedGroup.members.find(m => (m.first_name || '').toLowerCase().includes(uNameLower));
+        const fMember = selectedGroup.members.find(m => (m.first_name || '').toLowerCase().includes(fNameLower));
+        if (uMember) state.settings.splitwiseUserMemberId = String(uMember.id);
+        if (fMember) state.settings.splitwiseFlatmateMemberId = String(fMember.id);
+      }
+      saveData();
+      renderSettingsView();
+      renderSplitwiseView();
+    });
+
+    document.getElementById('settingsSwUserMemberId')?.addEventListener('change', (e) => {
+      state.settings.splitwiseUserMemberId = e.target.value;
+      saveData();
+    });
+
+    document.getElementById('settingsSwFlatmateMemberId')?.addEventListener('change', (e) => {
+      state.settings.splitwiseFlatmateMemberId = e.target.value;
+      saveData();
+    });
 
     // Splitwise View Filter Tabs
     document.querySelectorAll('.splitwise-filter-chip').forEach(chip => {

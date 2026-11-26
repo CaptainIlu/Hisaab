@@ -21,20 +21,28 @@
 - Tapping **"Add Bill Details"** opens an inline confirmation modal to quickly enter the exact amount (crucial for fluctuating bills like Electricity) or skip that bill for the month.
 - **Fully Configurable in Settings**: Add, edit, remove, or change default amounts, day of month (1-31), and payers for recurring bills anytime.
 
-### 3. 🔄 Splitwise Sync Tracker & Bi-Monthly Grocery Batches
-- Designed specifically for entering expenses into the official Splitwise app:
+### 3. 🔄 Splitwise Sync Tracker & Direct API Integration
+- **Direct Splitwise API Sync (No Copy-Paste Needed)**:
+  - Connect your Splitwise account with your Personal API Key in Settings.
+  - Choose your flat group and map you & your flatmate.
+  - Push individual flat bills or collective grocery batches directly into Splitwise with a single tap of **`[⚡ Sync to Splitwise]`** or **`[⚡ Sync All (API)]`**!
+  - Built-in proxy in `server.py` ensures seamless zero-CORS sync over local Wi-Fi, with custom proxy support for web deployments.
 - **Bi-Monthly Collective Grocery Batches (1-15th & 16th-End)**:
   - Record daily groceries (Blinkit, Zepto, Milk, Supermarket) individually as they happen.
   - In the **Splitwise** tab, they automatically roll up into two neat collective cycles:
-    - **Cycle 1 (1st – 15th)**: Total spend, who paid what (e.g. Shivam ₹2,350, Sanket ₹1,100), and a single **`[Mark Batch Added]`** button!
+    - **Cycle 1 (1st – 15th)**: Total spend, who paid what (e.g. Shivam ₹2,350, Sanket ₹1,100), and a single **`[⚡ Sync to Splitwise]`** button!
     - **Cycle 2 (16th – End of month)**: Same collective breakdown & 1-tap batch sync.
-  - **`[Copy for Splitwise]` per batch**: Instantly copies the collective total, payer breakdown, and individual receipt details formatted for Splitwise.
+  - **`[Copy for Splitwise]` per batch**: Instantly copies the collective total, payer breakdown, and individual receipt details formatted for Splitwise (100% reliable zero-setup fallback).
   - **Master "Copy Summary"**: Formats the entire month's pending expenses with groceries rolled up collectively into Cycle 1 & Cycle 2, and non-grocery flat bills listed individually.
 - **Instant Status Badge on Every Expense**: Toggle between `○ Splitwise` (pending) and `✓ In Splitwise` (synced) with a single tap.
 - **Interactive Checklist**: As you enter expenses on your phone's Splitwise app, tap checkboxes to mark them synced.
 - **"Mark All Added"**: 1-tap batch completion once your monthly sync is finished.
 
-### 4. 📱 100% Mobile-First PWA (Phone Native Feel)
+### 4. 🔍 Instant Search & Category Filters
+- **Real-time Search Bar**: Type to filter expenses instantly by title, category, notes, amount, or payer.
+- **Horizontal Category Pills**: Tap any category pill (with live month counts) to focus exclusively on Groceries, Electricity, Society, Maid, etc.
+
+### 5. 📱 100% Mobile-First PWA (Phone Native Feel)
 - Designed following clean design principles: touch targets (44px+), no clunky UI or neon glow.
 - **Refined Nordic Paper Aesthetic**: Warm linen background (`#f6f4ee`), clean typography, crisp touch targets (44px+), and dark pine teal accent with warm amber highlights.
 - Tactile bottom sheets for expense creation and editing.

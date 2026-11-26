@@ -509,6 +509,138 @@ html, body {
   font-weight: 600;
 }
 
+/* Search Bar */
+.search-bar-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar-box:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.search-icon {
+  color: var(--text-muted);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 13.5px;
+  width: 100%;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-full);
+}
+
+.search-clear-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Category Filter Scroll Bar */
+.category-scroll-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 10px 0;
+  margin-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-pill {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.cat-pill:hover {
+  border-color: var(--border-medium);
+}
+
+.cat-pill.active {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
+}
+
+.cat-pill-count {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+}
+
+.cat-pill.active .cat-pill-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Inline Sync Button */
+.inline-sync-btn {
+  background-color: var(--accent-subtle);
+  color: var(--accent-text);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.inline-sync-btn:hover {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+}
+
+.inline-sync-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Filter Chips Bar */
 .filter-bar {
   display: flex;
@@ -1086,16 +1218,25 @@ html, body {
   color: var(--warning);
 }
 
-.tag-done {
+.tag-done, .tag-connected {
   background-color: var(--accent-subtle);
   color: var(--accent-text);
 }
 
+.tag-error {
+  background-color: var(--danger-subtle);
+  color: var(--danger);
+}
+
 .action-row-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 14px;
+}
+
+.action-row-buttons .batch-btn {
+  flex: 1 1 120px;
 }
 
 .batch-btn {
